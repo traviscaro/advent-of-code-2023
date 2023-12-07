@@ -125,8 +125,27 @@ The power of a set of cubes is equal to the numbers of red, green, and blue cube
 For each game, find the minimum set of cubes that must have been present. What is the sum of the power of these sets?
  */
 fn part_2() {
-    // Print the sum.
-    println!("PART 2 ANSWER");
+    // Load data from file.
+    let lines = load_file("input.txt");
+
+    let mut bag_powers: Vec<u32> = Vec::new();
+    // Loop through lines of file. Each line represents a Game.
+    for line in lines {
+        let line = line.unwrap();
+        let game_id = parse_game_id(&line);
+        let sets = parse_sets(&line);
+        let game = Game { id: game_id, sets };
+        let min_bag = min_cubes_bag(&game);
+        let power = bag_power(&min_bag);
+
+        bag_powers.push(power);
+    }
+
+    // Sum the powers.
+    let sum: u32 = bag_powers.iter().sum();
+
+    // Print the sum of the powers.
+    println!("PART 2 ANSWER: {}", sum);
 }
 
 fn load_file(filename: &str) -> io::Lines<io::BufReader<File>> {
@@ -212,6 +231,35 @@ fn is_game_possible(game: &Game, bag: &Bag) -> bool {
     }
 
     return true;
+}
+
+fn min_cubes_bag(game: &Game) -> Bag {
+    // Loop through the sets
+    let mut min_bag = Bag {
+        red: 0,
+        green: 0,
+        blue: 0,
+    };
+
+    for set in game.sets.iter() {
+        // Loop through the cubes
+        for cube in set.cubes.iter() {
+            // Check if the number of cubes of the color is greater than the number of cubes of that color in the bag
+            if cube.color == "red" && cube.number > min_bag.red {
+                min_bag.red = cube.number;
+            } else if cube.color == "green" && cube.number > min_bag.green {
+                min_bag.green = cube.number;
+            } else if cube.color == "blue" && cube.number > min_bag.blue {
+                min_bag.blue = cube.number;
+            }
+        }
+    }
+
+    return min_bag;
+}
+
+fn bag_power(bag: &Bag) -> u32 {
+    return bag.red * bag.green * bag.blue;
 }
 
 #[cfg(test)]
